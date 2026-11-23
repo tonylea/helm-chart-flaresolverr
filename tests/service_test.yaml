@@ -1,0 +1,24 @@
+suite: Service
+release:
+  name: flaresolverr
+templates:
+  - templates/service.yaml
+tests:
+  - it: serves the API and metrics ports to the pod's ports
+    asserts:
+      - equal:
+          path: spec.ports
+          value:
+            - name: http
+              port: 8191
+              targetPort: http
+            - name: metrics
+              port: 8192
+              targetPort: metrics
+      - equal:
+          path: spec.selector
+          value:
+            app.kubernetes.io/name: flaresolverr
+            app.kubernetes.io/instance: flaresolverr
+      - notExists:
+          path: spec.type

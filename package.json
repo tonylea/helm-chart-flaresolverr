@@ -1,11 +1,11 @@
 {
-  "name": "helm-chart-app-name",
+  "name": "helm-chart-flaresolverr",
   "version": "1.0.0",
-  "description": "Deploys App Name, [what App Name does, in a few words]",
+  "description": "Deploys FlareSolverr, a proxy server that solves Cloudflare and DDoS-GUARD challenges for other apps",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tonylea/helm-chart-app-name.git"
+    "url": "git+https://github.com/tonylea/helm-chart-flaresolverr.git"
   },
   "license": "MIT",
   "scripts": {

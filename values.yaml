@@ -1,0 +1,12 @@
+image:
+  # Empty uses the chart's appVersion.
+  tag: ""
+
+resources: {}
+
+affinity: {}
+
+# A ServiceMonitor for the Prometheus Operator, scraping FlareSolverr's metrics.
+serviceMonitor:
+  enabled: true
+  interval: 30s
