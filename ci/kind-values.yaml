@@ -1,0 +1,3 @@
+# kind has no Prometheus Operator CRDs.
+serviceMonitor:
+  enabled: false

@@ -1,0 +1,121 @@
+suite: Deployment
+release:
+  name: flaresolverr
+templates:
+  - templates/deployment.yaml
+tests:
+  - it: runs one replica of the chart's appVersion, stopping the old pod first
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/flaresolverr/flaresolverr:v3.5.2
+
+  - it: uses the image tag when one is set
+    set:
+      image.tag: v3.5.1
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/flaresolverr/flaresolverr:v3.5.1
+
+  - it: turns on metrics
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env
+          value:
+            - name: PROMETHEUS_ENABLED
+              value: "true"
+      - equal:
+          path: spec.template.spec.containers[0].ports
+          value:
+            - name: http
+              containerPort: 8191
+            - name: metrics
+              containerPort: 8192
+
+  - it: probes /health on the API port
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet
+          value:
+            path: /health
+            port: http
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet
+          value:
+            path: /health
+            port: http
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet
+          value:
+            path: /health
+            port: http
+
+  - it: runs as the image's non-root user with no privileges
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext
+          value:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+
+  - it: gives /tmp an in-memory volume of 256Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes
+          value:
+            - name: tmp
+              emptyDir:
+                medium: Memory
+                sizeLimit: 256Mi
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts
+          value:
+            - name: tmp
+              mountPath: /tmp
+
+  - it: sets no resources by default
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value: {}
+
+  - it: sets the resources when given
+    set:
+      resources:
+        requests:
+          cpu: 100m
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            requests:
+              cpu: 100m
+
+  - it: sets affinity when given
+    set:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: example.com/zone
+                    operator: In
+                    values: ["a"]
+    asserts:
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+          value: example.com/zone
+
+  - it: sets no affinity by default
+    asserts:
+      - notExists:
+          path: spec.template.spec.affinity
