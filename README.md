@@ -16,6 +16,7 @@ The chart runs one replica:
 - An optional ServiceMonitor on the metrics port.
 
 The container runs as the image's own non-root user, with all capabilities dropped and no privilege escalation.
+It sets no `runAsNonRoot`, because the image's user is a name, and the kubelet can't verify a name isn't root.
 The chart sets no `runAsUser`, because the image leaves the UID unset, and no `readOnlyRootFilesystem`, because Chromium writes under `/app`.
 
 ## Values

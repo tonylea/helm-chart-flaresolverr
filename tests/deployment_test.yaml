@@ -57,12 +57,11 @@ tests:
             path: /health
             port: http
 
-  - it: runs as the image's non-root user with no privileges
+  - it: drops all capabilities and allows no privilege escalation
     asserts:
       - equal:
           path: spec.template.spec.containers[0].securityContext
           value:
-            runAsNonRoot: true
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
